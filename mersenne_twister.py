@@ -3,9 +3,12 @@ import random
 import sys
 
 
-def getMersenneTwister(n_samples: int) -> list:
-    random.seed(42)
+def getDecimalFractions(n_samples: int) -> list:
     return [random.random() for _ in range(n_samples)]
+
+
+def getGaussianDistribution(n_samples: int, mean: float = 0.0, std_dev: float = 1.0) -> list:
+    return [random.gauss(mean, std_dev) for _ in range(n_samples)]
 
 
 if __name__ == "__main__":
@@ -14,7 +17,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     n_samples = int(sys.argv[1])
-    mersenne_twister = getMersenneTwister(n_samples)
+    mersenne_twister = getGaussianDistribution(n_samples)
 
     df = pd.DataFrame(mersenne_twister, columns=["Mersenne-Twister Numbers"])
-    df.to_csv("data/mersenne_twister.csv", index=False)
+    df.to_csv("data/gaussian/mersenne_twister.csv", index=False)
