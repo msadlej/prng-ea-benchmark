@@ -3,21 +3,31 @@ import requests
 import sys
 
 
-def getTrueRandom(n_samples: int = 10000) -> list:
+def getTrueRandom(url: str) -> list:
     result = []
 
     try:
-        url = f"https://www.random.org/decimal-fractions/?num={n_samples}&dec=20&col=1&format=plain&rnd=new"
         response = requests.get(url)
 
         if response.status_code == 200:
             result = response.text.split()
         else:
-            print(f"Error: Failed to fetch true random numbers. HTTP {response.status_code}")
+            print(f"Failed to fetch true random numbers. HTTP {response.status_code}")
+            print(response.text)
     except Exception as e:
         print(f"Exception occurred: {e}")
 
     return result
+
+
+def getDecimalFractions(n_samples: int) -> list:
+    url = f"https://www.random.org/decimal-fractions/?num={n_samples}&dec=20&col=1&format=plain&rnd=new"
+    return getTrueRandom(url)
+
+
+def getGaussianDistribution(n_samples: int) -> list:
+    url = f"https://www.random.org/gaussian-distributions/?num={n_samples}&mean=0.0&stdev=1.0&dec=20&col=1&notation=scientific&format=plain&rnd=new"
+    return getTrueRandom(url)
 
 
 if __name__ == "__main__":
@@ -26,7 +36,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     n_samples = int(sys.argv[1])
-    true_random_numbers = getTrueRandom(n_samples)
+    true_random_numbers = getGaussianDistribution(n_samples)
 
-    df = pd.DataFrame(true_random_numbers, columns=["True Random Numbers"])
-    df.to_csv("data/true_random.csv", index=False)
+    df = pd.DataFrame(true_random_numbers)
+    df.to_csv("data/gaussian/true_random.csv", mode='a', index=False, header=False)
