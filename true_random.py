@@ -25,18 +25,13 @@ def getDecimalFractions(n_samples: int) -> list:
     return getTrueRandom(url)
 
 
-def getGaussianDistribution(n_samples: int) -> list:
-    url = f"https://www.random.org/gaussian-distributions/?num={n_samples}&mean=0.0&stdev=1.0&dec=20&col=1&notation=scientific&format=plain&rnd=new"
-    return getTrueRandom(url)
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python true_random.py {n_samples}")
         sys.exit(1)
 
     n_samples = int(sys.argv[1])
-    true_random_numbers = getGaussianDistribution(n_samples)
+    true_random_numbers = getDecimalFractions(n_samples)
 
-    df = pd.DataFrame(true_random_numbers)
-    df.to_csv("data/gaussian/true_random.csv", mode='a', index=False, header=False)
+    df = pd.DataFrame(true_random_numbers, columns=["True Random Numbers"])
+    df.to_csv("data/true_random.csv", index=False)
