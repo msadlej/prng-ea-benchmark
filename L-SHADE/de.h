@@ -9,6 +9,7 @@
 #ifndef _HEADER_H_
 #define _HEADER_H_
 
+#include "random_reader.h"
 #include <iomanip>
 #include <iostream>
 #include <math.h>
@@ -31,6 +32,9 @@ extern int g_pop_size;
 extern int g_memory_size;
 extern double g_p_best_rate;
 extern double g_arc_rate;
+
+extern RandomReader *random_reader;
+extern bool g_file_mode;
 
 void cec21_bias_shift_rot_func(double *, double *, int, int, int);
 void cec21_bias_shift_func(double *, double *, int, int, int);
@@ -58,7 +62,13 @@ class searchAlgorithm {
                          Individual &bsf_solution, Fitness &bsf_fitness);
 
     // Return random value with uniform distribution [0, 1)
-    inline double randDouble() { return (double)rand() / (double)RAND_MAX; }
+    inline double randDouble() {
+        if (g_file_mode) {
+            return random_reader->next();
+        }
+
+        return (double)rand() / (double)RAND_MAX;
+    }
 
     /*
       Return random value from Cauchy distribution with mean "mu" and variance

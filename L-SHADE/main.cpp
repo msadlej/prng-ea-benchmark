@@ -25,7 +25,22 @@ double g_arc_rate;
 int g_memory_size;
 double g_p_best_rate;
 
+RandomReader *random_reader;
+bool g_file_mode;
+
 int main(int argc, char **argv) {
+    if (argc < 2) {
+        g_file_mode = false;
+    } else if (argc == 2) {
+        g_file_mode = true;
+        string file_path = argv[1];
+
+        random_reader = new RandomReader(file_path, true);
+    } else {
+        cerr << "Usage: " << argv[0] << " [random number file path]" << endl;
+        return 1;
+    }
+
     // number of runs
     int num_runs = 51;
     // dimension size. please select from 10, 30, 50, 100
@@ -75,6 +90,10 @@ int main(int argc, char **argv) {
         cout << "\nmean = " << mean_bsf_fitness << ", std = " << std_bsf_fitness
              << endl;
         free(bsf_fitness_array);
+    }
+
+    if (g_file_mode) {
+        delete random_reader;
     }
 
     return 0;
