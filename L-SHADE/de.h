@@ -9,7 +9,7 @@
 #ifndef _HEADER_H_
 #define _HEADER_H_
 
-#include "random_reader.h"
+#include "Random-Reader/random_reader.h"
 #include <iomanip>
 #include <iostream>
 #include <math.h>

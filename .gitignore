@@ -4,6 +4,8 @@
 # Data
 L-SHADE/input_data/
 L-SHADE/results/
+CMA-ES/input_data/
+CMA-ES/results/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

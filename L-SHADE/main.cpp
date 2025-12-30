@@ -33,11 +33,12 @@ int main(int argc, char **argv) {
         g_file_mode = false;
     } else if (argc == 2) {
         g_file_mode = true;
-        string file_path = argv[1];
+        std::string file_path = argv[1];
 
         random_reader = new RandomReader(file_path, true);
     } else {
-        cerr << "Usage: " << argv[0] << " [random number file path]" << endl;
+        std::cerr << "Usage: " << argv[0] << " [random number file path]"
+                  << std::endl;
         return 1;
     }
 
@@ -57,39 +58,17 @@ int main(int argc, char **argv) {
     g_arc_rate = 2.6;
     g_p_best_rate = 0.11;
 
+    std::cout << "Function,Dimension,Run,ErrorValue" << std::endl;
     for (int i = 0; i < 10; i++) {
         g_function_number = i + 1;
-        cout << "\n-------------------------------------------------------"
-             << endl;
-        cout << "Function = " << g_function_number
-             << ", Dimension size = " << g_problem_size << "\n"
-             << endl;
-
-        Fitness *bsf_fitness_array =
-            (Fitness *)malloc(sizeof(Fitness) * num_runs);
-        Fitness mean_bsf_fitness = 0;
-        Fitness std_bsf_fitness = 0;
+        Fitness best_fitness = 0;
 
         for (int j = 0; j < num_runs; j++) {
             searchAlgorithm *alg = new LSHADE();
-            bsf_fitness_array[j] = alg->run();
-            cout << j + 1 << "th run, "
-                 << "error value = " << bsf_fitness_array[j] << endl;
+            best_fitness = alg->run();
+            std::cout << g_function_number << "," << g_problem_size << ","
+                      << (j + 1) << "," << best_fitness << std::endl;
         }
-
-        for (int j = 0; j < num_runs; j++)
-            mean_bsf_fitness += bsf_fitness_array[j];
-        mean_bsf_fitness /= num_runs;
-
-        for (int j = 0; j < num_runs; j++)
-            std_bsf_fitness +=
-                pow((mean_bsf_fitness - bsf_fitness_array[j]), 2.0);
-        std_bsf_fitness /= num_runs;
-        std_bsf_fitness = sqrt(std_bsf_fitness);
-
-        cout << "\nmean = " << mean_bsf_fitness << ", std = " << std_bsf_fitness
-             << endl;
-        free(bsf_fitness_array);
     }
 
     if (g_file_mode) {
