@@ -1,13 +1,18 @@
-#include <bits/stdc++.h>
-#include <ctime>
+#include <chrono>
+#include <iomanip>
+#include <iostream>
 #include <random>
+#include <vector>
 
 std::vector<long double> getDecimalFractions(unsigned long n_samples) {
-    std::minstd_rand gen(time(nullptr));
+    auto seed =
+        std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    std::minstd_rand gen(seed);
+    std::uniform_real_distribution<> dis(0.0, 1.0);
     std::vector<long double> result(n_samples);
 
     for (unsigned long i = 0; i < n_samples; i++) {
-        result[i] = gen() / (long double)gen.max();
+        result[i] = dis(gen);
     }
 
     return result;
