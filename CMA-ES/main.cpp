@@ -5,8 +5,6 @@
 
 using namespace libcmaes;
 
-void cec21_basic_func(double *x, double *f, int nx, int mx, int func_num);
-void cec21_shift_rot_func(double *x, double *f, int nx, int mx, int func_num);
 void cec21_bias_shift_rot_func(double *x, double *f, int nx, int mx,
                                int func_num);
 
@@ -16,19 +14,6 @@ int ini_flag = 0, n_flag, func_flag, *SS = nullptr;
 int g_function_number = 1;
 extern bool g_file_mode;
 extern RandomReader *random_reader;
-
-FitFunc fcec21_basic = [](const double *x, const int N) {
-    double result;
-    cec21_basic_func(const_cast<double *>(x), &result, N, 1, g_function_number);
-    return result;
-};
-
-FitFunc fcec21_shift_rot = [](const double *x, const int N) {
-    double result;
-    cec21_shift_rot_func(const_cast<double *>(x), &result, N, 1,
-                         g_function_number);
-    return result;
-};
 
 FitFunc fcec21_bias_shift_rot = [](const double *x, const int N) {
     double result;
@@ -53,8 +38,14 @@ int main(int argc, char *argv[]) {
         std::string file_path = argv[1];
 
         random_reader = new RandomReader(file_path, true);
+    } else if (argc == 3) {
+        g_file_mode = true;
+        std::string file_path = argv[1];
+        size_t n_rows = static_cast<size_t>(std::stoul(argv[2]));
+
+        random_reader = new RandomReader(file_path, n_rows, true);
     } else {
-        std::cerr << "Usage: " << argv[0] << " [random number file path]"
+        std::cerr << "Usage: " << argv[0] << " [file path] [max numbers]"
                   << std::endl;
         return 1;
     }
@@ -69,7 +60,7 @@ int main(int argc, char *argv[]) {
         ubounds[i] = 100.0;
     }
 
-    std::cout << "Function,Dimension,Run,ErrorValue" << std::endl;
+    std::cout << "Function,Dimension,Run,ErrorValue,Evals,Time" << std::endl;
     for (int i = 0; i < 10; i++) {
         g_function_number = i + 1;
 
@@ -88,10 +79,12 @@ int main(int argc, char *argv[]) {
 
             CMASolutions cmasols = cmaes<GenoPheno<pwqBoundStrategy>>(
                 fcec21_bias_shift_rot, cmaparams);
-            double best_fitness = cmasols.best_candidate().get_fvalue();
+            double best_fitness =
+                cmasols.get_best_seen_candidate().get_fvalue();
 
             std::cout << g_function_number << "," << dim << "," << (run + 1)
-                      << "," << best_fitness << std::endl;
+                      << "," << best_fitness << "," << cmasols.fevals() << ","
+                      << cmasols.elapsed_time() / 1000.0 << std::endl;
         }
     }
 

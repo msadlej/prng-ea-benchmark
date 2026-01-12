@@ -1,11 +1,12 @@
 #include "random_reader.h"
+#include <algorithm>
+#include <random>
 
 EmptyFileException::EmptyFileException()
     : std::runtime_error("The file is empty!") {}
 
-RandomReader::RandomReader(const std::string &filename, bool header)
-    : header(header) {
-    current_row = header ? 1 : 0;
+RandomReader::RandomReader(const std::string &filename, bool header) {
+    rapidcsv::Document doc;
 
     if (header) {
         doc = rapidcsv::Document(filename);
@@ -13,25 +14,51 @@ RandomReader::RandomReader(const std::string &filename, bool header)
         doc = rapidcsv::Document(filename, rapidcsv::LabelParams(-1, -1));
     }
 
-    if (doc.GetRowCount() <= current_row) {
+    if (doc.GetRowCount() <= 0) {
         throw EmptyFileException();
     }
+
+    values = doc.GetColumn<double>(0);
+    current_row = 0;
+}
+
+RandomReader::RandomReader(const std::string &filename, size_t n_rows,
+                           bool header) {
+    rapidcsv::Document doc;
+
+    if (header) {
+        doc = rapidcsv::Document(filename);
+    } else {
+        doc = rapidcsv::Document(filename, rapidcsv::LabelParams(-1, -1));
+    }
+
+    if (doc.GetRowCount() <= 0) {
+        throw EmptyFileException();
+    }
+
+    values = doc.GetColumn<double>(0);
+    if (n_rows < values.size()) {
+        values.resize(n_rows);
+    }
+
+    current_row = 0;
 }
 
 double RandomReader::next() {
-    if (current_row >= doc.GetRowCount()) {
+    if (current_row >= values.size()) {
         reset();
     }
 
-    double result = doc.GetCell<double>(0, current_row);
+    double result = values[current_row];
     current_row++;
+
     return result;
 }
 
 void RandomReader::reset() {
-    size_t min_row = header ? 1 : 0;
-    size_t max_row = doc.GetRowCount() - 1;
-    size_t range = max_row - min_row + 1;
+    current_row = 0;
 
-    current_row = min_row + (std::rand() % range);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(values.begin(), values.end(), gen);
 }

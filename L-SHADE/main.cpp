@@ -36,12 +36,17 @@ int main(int argc, char **argv) {
         std::string file_path = argv[1];
 
         random_reader = new RandomReader(file_path, true);
+    } else if (argc == 3) {
+        g_file_mode = true;
+        std::string file_path = argv[1];
+        size_t n_rows = static_cast<size_t>(std::stoul(argv[2]));
+
+        random_reader = new RandomReader(file_path, n_rows, true);
     } else {
-        std::cerr << "Usage: " << argv[0] << " [random number file path]"
+        std::cerr << "Usage: " << argv[0] << " [file path] [max numbers]"
                   << std::endl;
         return 1;
     }
-
     // number of runs
     int num_runs = 51;
     // dimension size. please select from 10, 30, 50, 100
@@ -64,10 +69,12 @@ int main(int argc, char **argv) {
         Fitness best_fitness = 0;
 
         for (int j = 0; j < num_runs; j++) {
-            searchAlgorithm *alg = new LSHADE();
+            LSHADE *alg = new LSHADE();
             best_fitness = alg->run();
             std::cout << g_function_number << "," << g_problem_size << ","
                       << (j + 1) << "," << best_fitness << std::endl;
+
+            delete alg;
         }
     }
 

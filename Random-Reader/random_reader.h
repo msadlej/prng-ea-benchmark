@@ -11,12 +11,13 @@ class EmptyFileException : public std::runtime_error {
 
 class RandomReader {
   private:
-    rapidcsv::Document doc;
+    std::vector<double> values;
     size_t current_row;
-    bool header;
 
   public:
     RandomReader(const std::string &filename, bool header = false);
+    RandomReader(const std::string &filename, size_t n_rows,
+                 bool header = false);
 
     double next();
     void reset();
