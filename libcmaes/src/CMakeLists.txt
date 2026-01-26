@@ -12,8 +12,7 @@ set (
   cmastrategy.cc
   errstats.cc
   ipopcmastrategy.cc
-  eigenmvn_globals.cc
-  ${PROJECT_SOURCE_DIR}/../../Random-Reader/random_reader.cpp)
+  eigenmvn_globals.cc)
 
 set(header_path "${PROJECT_SOURCE_DIR}/include/libcmaes")
 set (LIBCMAES_HEADERS

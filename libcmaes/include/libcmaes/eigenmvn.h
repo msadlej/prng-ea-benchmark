@@ -38,14 +38,17 @@
 #ifndef __EIGENMULTIVARIATENORMAL_HPP
 #define __EIGENMULTIVARIATENORMAL_HPP
 
-#include "Random-Reader/random_reader.h"
+#include "Random-Buffer/random_buffer.h"
 #include <Eigen/Dense>
 #include <math.h>
+#include <memory>
 #include <random>
 #include <stdexcept>
 
-extern bool g_file_mode;
-extern RandomReader *random_reader;
+extern bool g_buffer_mode;
+extern std::unique_ptr<
+    RandomBuffer<std::normal_distribution<>, std::mt19937_64>>
+    random_buffer;
 
 /*
   We need a functor that can pretend it's const,
@@ -64,7 +67,7 @@ template <typename Scalar> class scalar_normal_dist_op {
     }
 
   public:
-    static std::mt19937 rng; // The uniform pseudo-random algorithm
+    static std::mt19937_64 rng; // The uniform pseudo-random algorithm
     mutable std::normal_distribution<Scalar> norm; // gaussian combinator
 
     // EIGEN_EMPTY_STRUCT_CTOR(scalar_normal_dist_op)
@@ -94,9 +97,8 @@ template <typename Scalar> class scalar_normal_dist_op {
 
     template <typename Index>
     inline const Scalar operator()(Index, Index = 0) const {
-        if (g_file_mode) {
-            return std::sqrt(-2.0 * std::log(random_reader->next())) *
-                   std::sin(2.0 * M_PI * random_reader->next());
+        if (g_buffer_mode) {
+            return random_buffer->next();
         }
 
         return norm(rng);
@@ -104,7 +106,7 @@ template <typename Scalar> class scalar_normal_dist_op {
     inline void seed(const uint64_t &s) { rng.seed(s); }
 };
 
-template <typename Scalar> std::mt19937 scalar_normal_dist_op<Scalar>::rng;
+template <typename Scalar> std::mt19937_64 scalar_normal_dist_op<Scalar>::rng;
 
 template <typename Scalar>
 struct functor_traits<scalar_normal_dist_op<Scalar>> {
@@ -145,15 +147,17 @@ template <typename Scalar> class EigenMultivariateNormal {
                       // eigenvalues and vectors
 
   public:
-    EigenMultivariateNormal(const bool &use_cholesky = false,
-                            const uint64_t &seed = std::mt19937::default_seed)
+    EigenMultivariateNormal(
+        const bool &use_cholesky = false,
+        const uint64_t &seed = std::mt19937_64::default_seed)
         : _use_cholesky(use_cholesky) {
         randN.seed(seed);
     }
-    EigenMultivariateNormal(const Matrix<Scalar, Dynamic, 1> &mean,
-                            const Matrix<Scalar, Dynamic, Dynamic> &covar,
-                            const bool &use_cholesky = false,
-                            const uint64_t &seed = std::mt19937::default_seed)
+    EigenMultivariateNormal(
+        const Matrix<Scalar, Dynamic, 1> &mean,
+        const Matrix<Scalar, Dynamic, Dynamic> &covar,
+        const bool &use_cholesky = false,
+        const uint64_t &seed = std::mt19937_64::default_seed)
         : _use_cholesky(use_cholesky) {
         randN.seed(seed);
         setMean(mean);

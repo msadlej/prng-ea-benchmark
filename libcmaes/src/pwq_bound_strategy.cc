@@ -97,9 +97,9 @@ namespace libcmaes
     for (int i=0;i<x.rows();i++) //TODO: vectorize ?
       {
 	if (x_s[i] < _xlow[i])
-	  x_s[i] += _r[i] * (1.0 + static_cast<int>((_xlow[i]-x_s[i])/_r[i])); // shift up.
+	  x_s[i] += _r[i] * (1.0 + static_cast<int64_t>((_xlow[i]-x_s[i])/_r[i])); // shift up.
 	if (x_s[i] > _xup[i])
-	  x_s[i] -= _r[i] * (1.0 + static_cast<int>((x_s[i]-_xup[i])/_r[i])); // shift down;
+	  x_s[i] -= _r[i] * (1.0 + static_cast<int64_t>((x_s[i]-_xup[i])/_r[i])); // shift down;
 	if (x_s[i] < _lbounds[i] - _al[i])
 	  x_s[i] += 2.0 * (_lbounds[i] - _al[i] - x_s[i]);
 	if (x_s[i] > _ubounds[i] + _au[i])
