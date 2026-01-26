@@ -9,10 +9,13 @@
 #ifndef _HEADER_H_
 #define _HEADER_H_
 
-#include "Random-Reader/random_reader.h"
+#include "CEC-2013/cec2013_func.h"
+#include "Random-Buffer/random_buffer.h"
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <math.h>
+#include <random>
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
@@ -33,9 +36,12 @@ extern int g_memory_size;
 extern double g_p_best_rate;
 extern double g_arc_rate;
 
-extern RandomReader *random_reader;
-extern bool g_file_mode;
+extern bool g_buffer_mode;
+extern std::unique_ptr<
+    RandomBuffer<std::uniform_real_distribution<>, std::minstd_rand>>
+    random_buffer;
 
+/*
 void cec21_bias_shift_rot_func(double *, double *, int, int, int);
 void cec21_bias_shift_func(double *, double *, int, int, int);
 void cec21_bias_rot_func(double *, double *, int, int, int);
@@ -44,12 +50,16 @@ void cec21_rot_func(double *, double *, int, int, int);
 void cec21_shift_func(double *, double *, int, int, int);
 void cec21_bias_func(double *, double *, int, int, int);
 void cec21_basic_func(double *, double *, int, int, int);
+*/
 
 class searchAlgorithm {
   public:
     virtual Fitness run() = 0;
 
   protected:
+    std::minstd_rand engine_;
+    std::uniform_real_distribution<> dist_{0.0, 1.0};
+
     void evaluatePopulation(const vector<Individual> &pop,
                             vector<Fitness> &fitness);
     void initializeFitnessFunctionParameters();
@@ -63,11 +73,11 @@ class searchAlgorithm {
 
     // Return random value with uniform distribution [0, 1)
     inline double randDouble() {
-        if (g_file_mode) {
-            return random_reader->next();
+        if (g_buffer_mode) {
+            return random_buffer->next();
         }
 
-        return (double)rand() / (double)RAND_MAX;
+        return dist_(engine_);
     }
 
     /*

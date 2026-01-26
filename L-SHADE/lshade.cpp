@@ -13,6 +13,10 @@ Fitness LSHADE::run() {
     initializeParameters();
     setSHADEParameters();
 
+    auto seed =
+        std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    engine_.seed(seed);
+
     // cout << pop_size << endl;
     // cout << arc_size << endl;
     // cout << p_best_rate << endl;

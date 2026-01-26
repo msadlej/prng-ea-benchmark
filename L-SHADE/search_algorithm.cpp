@@ -24,18 +24,21 @@ void searchAlgorithm::initializeParameters() {
 void searchAlgorithm::evaluatePopulation(const vector<Individual> &pop,
                                          vector<Fitness> &fitness) {
     for (int i = 0; i < pop_size; i++) {
+        test_func(pop[i], &fitness[i], problem_size, 1, function_number);
+        /*
         cec21_bias_shift_rot_func(pop[i], &fitness[i], problem_size, 1,
                                   function_number);
-        // cec21_bias_shift_func(pop[i],  &fitness[i], problem_size, 1,
-        // function_number); cec21_bias_rot_func(pop[i],  &fitness[i],
-        // problem_size, 1, function_number); cec21_shift_rot_func(pop[i],
-        // &fitness[i], problem_size, 1, function_number);
-        // cec21_bias_func(pop[i],  &fitness[i], problem_size, 1,
-        // function_number); cec21_shift_func(pop[i],  &fitness[i],
-        // problem_size, 1, function_number); cec21_rot_func(pop[i],
-        // &fitness[i], problem_size, 1, function_number);
-        // cec21_basic_func(pop[i],  &fitness[i], problem_size, 1,
-        // function_number);
+        cec21_bias_shift_func(pop[i],  &fitness[i], problem_size, 1,
+        function_number); cec21_bias_rot_func(pop[i],  &fitness[i],
+        problem_size, 1, function_number); cec21_shift_rot_func(pop[i],
+        &fitness[i], problem_size, 1, function_number);
+        cec21_bias_func(pop[i],  &fitness[i], problem_size, 1,
+        function_number); cec21_shift_func(pop[i],  &fitness[i],
+        problem_size, 1, function_number); cec21_rot_func(pop[i],
+        &fitness[i], problem_size, 1, function_number);
+        cec21_basic_func(pop[i],  &fitness[i], problem_size, 1,
+        function_number);
+        */
     }
 }
 

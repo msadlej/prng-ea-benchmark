@@ -25,37 +25,42 @@ double g_arc_rate;
 int g_memory_size;
 double g_p_best_rate;
 
-RandomReader *random_reader;
-bool g_file_mode;
+bool g_buffer_mode;
+std::unique_ptr<
+    RandomBuffer<std::uniform_real_distribution<>, std::minstd_rand>>
+    random_buffer;
 
 int main(int argc, char **argv) {
+    size_t buffer_size;
+    BufferCycleStrategy strategy;
+
     if (argc < 2) {
-        g_file_mode = false;
+        g_buffer_mode = false;
     } else if (argc == 2) {
-        g_file_mode = true;
-        std::string file_path = argv[1];
-
-        random_reader = new RandomReader(file_path, true);
+        g_buffer_mode = true;
+        buffer_size = static_cast<size_t>(std::stoul(argv[1]));
+        strategy = BufferCycleStrategy::RESTART;
     } else if (argc == 3) {
-        g_file_mode = true;
-        std::string file_path = argv[1];
-        size_t n_rows = static_cast<size_t>(std::stoul(argv[2]));
+        g_buffer_mode = true;
+        buffer_size = static_cast<size_t>(std::stoul(argv[1]));
 
-        random_reader = new RandomReader(file_path, n_rows, true);
+        std::string action(argv[2]);
+        if (action == "shuffle")
+            strategy = BufferCycleStrategy::SHUFFLE;
+        else if (action == "offset")
+            strategy = BufferCycleStrategy::OFFSET;
+        else
+            strategy = BufferCycleStrategy::RESTART;
     } else {
-        std::cerr << "Usage: " << argv[0] << " [file path] [max numbers]"
-                  << std::endl;
+        std::cerr << "Usage: " << argv[0]
+                  << " [buffer size] [shuffle/offset/none]" << std::endl;
         return 1;
     }
-    // number of runs
-    int num_runs = 51;
-    // dimension size. please select from 10, 30, 50, 100
-    g_problem_size = 10;
-    // available number of fitness evaluations
-    g_max_num_evaluations = g_problem_size * 10000;
 
-    // random seed is selected based on time according to competition rules
-    srand((unsigned)time(NULL));
+    int num_runs = 51;
+    int num_functions = 28;
+    g_problem_size = 50;
+    g_max_num_evaluations = g_problem_size * 10000;
 
     // L-SHADE parameters
     g_pop_size = (int)round(g_problem_size * 18);
@@ -63,23 +68,32 @@ int main(int argc, char **argv) {
     g_arc_rate = 2.6;
     g_p_best_rate = 0.11;
 
-    std::cout << "Function,Dimension,Run,ErrorValue" << std::endl;
-    for (int i = 0; i < 10; i++) {
-        g_function_number = i + 1;
+    std::cout << "Function,Dimension,Run,Error" << std::endl;
+    for (int r = 0; r < num_runs; r++) {
         Fitness best_fitness = 0;
+        if (g_buffer_mode) {
+            auto seed = std::chrono::high_resolution_clock::now()
+                            .time_since_epoch()
+                            .count();
+            std::minstd_rand gen(seed);
+            std::uniform_real_distribution<> dis(0.0, 1.0);
 
-        for (int j = 0; j < num_runs; j++) {
+            random_buffer.reset(
+                new RandomBuffer<std::uniform_real_distribution<>,
+                                 std::minstd_rand>(gen, dis, buffer_size,
+                                                   strategy));
+        }
+
+        for (int f = 0; f < num_functions; f++) {
+            g_function_number = f + 1;
+
             LSHADE *alg = new LSHADE();
             best_fitness = alg->run();
             std::cout << g_function_number << "," << g_problem_size << ","
-                      << (j + 1) << "," << best_fitness << std::endl;
+                      << (r + 1) << "," << best_fitness << std::endl;
 
             delete alg;
         }
-    }
-
-    if (g_file_mode) {
-        delete random_reader;
     }
 
     return 0;
